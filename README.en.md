@@ -1,7 +1,8 @@
 # StudyNotes
 
 #### Description
-这是属于我个人的学习笔记，用于记录个人工作生活中遇到的一些新奇的事务，工作经验，读书笔记。大部分用Emacs org-mode 来记录，或者其他编辑器。
+this_is_part_of_my_personal_study_notes_for_recording_some_new_personal_matters_encountered_in_work_life,_work experience, study notes.
+
 
 #### Software Architecture
 Software architecture description
