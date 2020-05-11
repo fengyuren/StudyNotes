@@ -70,8 +70,165 @@
 ** DONE [%] 开始引导修改第一个点击事件
 ** DONE [%] 技能突破和升级
    SCHEDULED: <2020-01-17 周五>
- 
-  
    
+* TODO [63%] 本周计划 
+  SCHEDULED: <2020-02-11 周二> 
+*** DONE [%] 更新任务的icon， 具体看美术群
+*** DONE [%] 新手目标
+*** DONE [%] 开服目标奖励接口：
+    1.列表
+    协议：8016
+    请求参数：无
+    返回结构：OpenServiceGoalsListResult
+    2.领取奖励
+    协议：8017
+    请求参数：{code：唯一ID；condition：条件}
+    返回结构：RewardResult
+    错误提示：{6016：未找到配置；6017：功能已关闭；6018：奖励已领取；6019：条件不满足}
+*** DONE [%] 新的碎片合成协议修改：
+    319返回给客户端需要修改
+    修改为：
+    //item合成
+    message ItemComposeRewardResult{
+    required bool placeholder = 1;
+    repeated  RewardResult reward=2;  //奖励
+    }
+    
+    协议已经上传
+*** DONE [%] 魔法门新测试地址：
+    版本：129.211.116.243
+    登录：129.211.116.243:3358
+    游戏测试一区：49.234.150.87:6501
+    中心服地址：49.234.129.12:3379
+*** TODO [%] 魔法门用户行为日志
+    密钥：9fee08ea5039bd9ce58b7a5e172ecd76
+*** DONE [%] 百鬼的转盘数据接到GM
+    接口地址：/gmGame
+    请求参数：
+    id:大区ID；
+    command：searchSpinLogByTime （固定值）；
+    playerid：玩家ID；
+    starttime：查询开始时间（格式：yyyy-MM-dd HH:mm:ss）
+    endtime：查询结束时间（格式：yyyy-MM-dd HH:mm:ss）
+	pagesize：分页下标
+	rows：显示行数
+	如果pagesize和rows都为0的情况下，在返回数据Total会显示总共条数，
+	便于做分页处理！
+	
+	// 奖励数据
+	message RewardResult {
+	repeated ValueResult values = 1; // 数值类型
+	repeated MapResult maps = 2; // 地图数据
+	repeated FateResult fates = 3; // 宿命武器数据
+	repeated HeroResult heroes = 4; // 英雄数据
+	repeated ItemResult items = 5; // 道具数据
+	repeated MineResult mines = 6; // 矿场数据
+	repeated PitmanResult pitmen = 7; // 矿工数据
+	repeated MinePlantResult plants = 8; // 矿工坊数据
+	optional string MailResult= 9;//邮件事件
+	repeated EquipResult equips = 10; // 装备数据
+	}
+
+*** TODO [%] 百鬼行为日志
+    channel：1
+    渠道Key：1c728919df39864110fe584842319baa
+    
+*** DONE [%] 百鬼日版禁言
+    接口地址：/instruct
+    接口参数：
+    ids:大区ID
+    command:banned
+    playerid:玩家ID
+    type:类型{1:家族；2：世界；3：个人}
+    unlocktime : 解封时间
+    reason ：封禁原因
+    
+*** TODO [%] 以下是百鬼日服-成长基金新增的GM接口，你看需不需要接入一下
+======玩家设置已购买条件=====
+地址：/gmGame
+参数：
+     id：大区ID
+     raw：是否显示结果  true/false
+     command：growthFundToBuy
+     playerid：玩家ID 
+====玩家领取日志=====
+地址：/gmGame
+参数：
+     id：大区ID
+     raw：是否显示结果  true/false
+     command：growthFundToLog
+     playerid：玩家ID
+     
+*** TODO [%] 英雄碎片分解
+    协议号：8018
+    参数：碎片Code，数量
+    还回结构：rewardResult
+    错误提示：{6020：类型错误；6021：数量不足；6022：事件未绑定}
+* 魔法门进入登录流程
+ 1) 游戏初始化，权限初始化、sdk初始化
+ 2) 检测基础版本号，是否有强更版本
+ 3) 检测资源版本号，是否有补丁更新
+ 4) sdk登录，获取token信息
+ 5) auth登录（token+ 其他信息）， 获取区服信息
+ 6) 选服进行登录游戏服enter
+ 7) 进度条10% 0号接口，获取该账号是否建立角色 和配置表版本号
+ 8) 进度条20% 下载配置表，
+ 9) 进度条50% 获取玩家数据信息
+ 10) 进度调70% 获取vip信息
+ 11) 进度条90% 英雄操作打折活动数据
+ 12) 进入游戏主界面
+   
+* 魔法门加密解压过程
+  1) 代码加密- 使用luajit加密 32或64， 或者luac加密
+  2) 资源加密 quick提供的pack_files.sh对图片进行加密基本原理就是对每个图片
+  使用xxtea加密算法对图片二进制数据进行加密，我们只需要提供密钥key和签名
+  sign即可。
+  3)解密：UzWan.cn;?N 先判断加密的签名是否为空。如果为空就是未加密的，不为空就需要解密
+  加载文件时候FileUtils::ResEncryptData FileUtils::encryptData = FileUtils::ResEncryptData(true, "LetMe1n!Waw", "UzWan.cn"); 
+  
+* 热更的流程
+ 1. 热更版本号的管理在游戏版本服上面
+ 2. 本地利用svn版本差异，提取修改文件，制作补丁包，上传至cdn，修改版本号
+ 3. 进入游戏的时候客户向版本服务器请求最新版本号，如果小于最新版号，
+    就会下载热更文件，从里面提取我目前版本号所对应的热更文件名字，然后再足以下载
+ 4. 下载完成后进行解压，然后从进游戏 
  
+* 网络通讯机制
+  - http：post通讯
+  - 短连接 一问一答 
+    
+1) 创建一个请求
+    auto postReq = new HtttRequest();
+    postReq:setTag("type post");
+    postReq:setUrl("http://httpbin.org/post");
+    postReq:setRequestType(HttpRequest::Type:POST)
+2) 设置请求头信息
+   std::vector<std:string> header;
+   header.push_back("Content-Type:application/json;charset=utf-8");
+   postReq->setHeaders(header);
+3) 设置请求数据
+   const char* reqData = "controller = cocos2d&action=testHttpPost"
+   postReq->setRequestData(reqData, strlen(reqData))
+   postReq->setRequestCallback(CC_CALLBACK_2(TestHtttp::complete, this));
+  auto client2 = HttpClient::getInstance();
+4) 创建一个请求队列并发送这个请求 send(postReq)
+   client2->sendImmediate(postReq);
+   postReq->release();
+5) 判断是否响应成功
+   if(response->isSucceed())
+{
+//4.获取返回的数据（字符数组）
+std::vector<char> * data = response->getResponseData();
+   //创建一个标准的字符串流
+        std::stringstream oss;
+        for (int i = 0; i < data->size(); i++)
+        {   
+            oss<<(*data)[i];//字符数组data  输出到 字符串流oss
+        }
+        std::string str = oss.str();//字符串流转化为字符串
+        log("response data is:%s",str.c_str());
+	
+}
+
+    
 * TODO 尝试摆脱方向键
